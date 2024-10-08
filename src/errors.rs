@@ -1,7 +1,8 @@
 use actix_web::{HttpResponse, ResponseError};
-use serde::Serialize;
 use std::fmt::{Display, Formatter, Result as FmtResult};
 use std::error::Error;
+
+use crate::utils::response::StandardResponse;
 
 /// Custom application error type
 #[derive(Debug)]
@@ -10,12 +11,6 @@ pub enum AppError {
     Unauthorized(String),
     NotFound(String),
     InternalError(String),
-}
-
-/// Struct for serializing error responses
-#[derive(Serialize)]
-struct ErrorResponse {
-    error: String,
 }
 
 impl Display for AppError {
@@ -33,16 +28,16 @@ impl Error for AppError {}
 
 impl ResponseError for AppError {
     fn error_response(&self) -> HttpResponse {
-        let error_message = self.to_string();
-        let error_response = ErrorResponse {
-            error: error_message,
+        let (code, message) = match self {
+            AppError::BadRequest(msg) => (400, msg.clone()),
+            AppError::Unauthorized(msg) => (401, msg.clone()),
+            AppError::NotFound(msg) => (404, msg.clone()),
+            AppError::InternalError(msg) => (500, msg.clone()),
         };
 
-        match self {
-            AppError::BadRequest(_) => HttpResponse::BadRequest().json(error_response),
-            AppError::Unauthorized(_) => HttpResponse::Unauthorized().json(error_response),
-            AppError::NotFound(_) => HttpResponse::NotFound().json(error_response),
-            AppError::InternalError(_) => HttpResponse::InternalServerError().json(error_response),
-        }
+        let response = StandardResponse::<()>::new_error(code, message);
+
+        HttpResponse::build(actix_web::http::StatusCode::from_u16(code).unwrap())
+            .json(response)
     }
 }

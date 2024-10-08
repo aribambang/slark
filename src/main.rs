@@ -3,6 +3,7 @@ mod db;
 mod errors;
 mod handlers;
 mod routes;
+mod utils;
 
 use actix_web::{App, HttpServer, middleware::Logger, web};
 use dotenv::dotenv;
