@@ -16,8 +16,17 @@ impl<T> StandardResponse<T>
 where
     T: Serialize,
 {
+    /// Creates a new `StandardResponse` with code 201
+    pub fn new(message: String, data: T) -> Self {
+        Self {
+            code: 201,
+            message,
+            data: Some(data),
+        }
+    }
+
     /// Creates a new `StandardResponse` with data
-    pub fn new_success(message: String, data: T) -> Self {
+    pub fn success(message: String, data: T) -> Self {
         Self {
             code: 200,
             message,
@@ -26,7 +35,7 @@ where
     }
 
     /// Creates a new `StandardResponse` without data
-    pub fn new_success_no_data(message: String) -> Self {
+    pub fn success_no_data(message: String) -> Self {
         Self {
             code: 200,
             message,

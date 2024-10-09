@@ -2,6 +2,7 @@ mod config;
 mod db;
 mod errors;
 mod handlers;
+mod models;
 mod routes;
 mod utils;
 
@@ -12,7 +13,7 @@ use sqlx::PgPool;
 
 use crate::config::Config;
 use crate::db::connection::establish_connection;
-use crate::routes::health_check;
+use crate::routes::{health_check, auth};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -33,6 +34,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(db_pool.clone()))
             .app_data(web::Data::new(config_clone.clone()))
             .configure(health_check::health_check_routes)
+            .configure(auth::auth_routes)
     })
     .bind((config.host.as_str(), config.port))?
     .run()
